@@ -5,15 +5,17 @@ import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import Swal from "sweetalert2";
 import bkash from '../../assets/logo/bkash.jpeg'
 import { FiCopy } from 'react-icons/fi';
+import { useNavigate } from "react-router-dom";
 
 const OrderModel = ({ isOpen, setIsOpen, product }) => {
 
     const { user } = useAuth()
     const axiosSecure = useAxiosSecure()
+    const navigate=useNavigate()
     if (!product) return null;
 
     const { productName, discountedPrice, price, images, discountPercentage,
-        outOfChittagongDeliveryPrice,insideChittagongDeliveryPrice,bkashNumber, quantity, sizes, colors, _id } = product;
+        outOfChittagongDeliveryPrice,insideChittagongDeliveryPrice,bkashNumber, quantity, sizes, colors, _id,seller } = product;
     const [selectedQuantity, setSelectedQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
@@ -75,9 +77,10 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
     const productPrice=discountedPrice * selectedQuantity;
     const SinglePrice =discountedPrice
 
-    const handleConfirmOrder = async () => {
+    const handleConfirmOrder = async (event) => {
+        event.preventDefault(); // ফর্ম সাবমিটের পর রিফ্রেশ হওয়া বন্ধ করবে
         setLoading(true);
-
+    
         if (!selectedColor || !selectedSize) {
             setLoading(false);
             Swal.fire({
@@ -85,9 +88,9 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
                 title: 'ভ্যালিডেশন ব্যর্থ!',
                 text: 'দয়া করে রং এবং আকার নির্বাচন করুন।',
             });
-            return; // Validation ফেইল হলে ফাংশন থামিয়ে দাও
+            return;
         }
-
+    
         if (!/^\d{11}$/.test(phoneNumber)) {
             setLoading(false);
             Swal.fire({
@@ -97,7 +100,7 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
             });
             return;
         }
-
+    
         if (!division || !district || !upazila.trim() || address.length < 10) {
             setLoading(false);
             Swal.fire({
@@ -107,6 +110,7 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
             });
             return;
         }
+    
         if (!transactionId || transactionId.length !== 10) {
             setLoading(false);
             Swal.fire({
@@ -114,9 +118,9 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
                 title: 'অবৈধ ট্রানজেকশন আইডি',
                 text: 'দয়া করে ১০ অক্ষরের সঠিক ট্রানজেকশন আইডি প্রবেশ করুন।',
             });
-            return; // Stop execution if validation fails
+            return;
         }
-
+    
         const updatedOrderInfo = {
             customer: {
                 name: user?.displayName,
@@ -140,22 +144,26 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
             orderNote,
             deliveryPrice,
             transactionId,
-            status: "pending", // প্রাথমিক অবস্থায়: pending
+            status: "pending",
+            seller:seller?.email
+           
         };
-
+    
         try {
             const response = await axiosSecure.post("/orders", updatedOrderInfo);
             if (response.data.insertedId) {
-                const updateStock = await axiosSecure.patch(`/products/quantity/${_id}`, {
+                await axiosSecure.patch(`/products/quantity/${_id}`, {
                     quantityToUpdate: selectedQuantity,
                     status: "decrease",
                 });
-
+    
                 setLoading(false);
                 Swal.fire({
                     icon: 'success',
                     title: 'অর্ডার নিশ্চিত করা হয়েছে!',
                     text: 'আপনার অর্ডার সফলভাবে স্থাপন করা হয়েছে।',
+                }).then(() => {
+                    navigate('/my-orders'); // সফল হলে My Orders এ পাঠানো হবে
                 });
             }
         } catch (error) {
@@ -167,6 +175,7 @@ const OrderModel = ({ isOpen, setIsOpen, product }) => {
             });
         }
     };
+    
 
     return (
         <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="fixed inset-0 flex -mt-26 items-center justify-center z-50">

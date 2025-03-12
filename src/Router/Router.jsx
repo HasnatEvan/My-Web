@@ -14,6 +14,7 @@ import AddItem from "../Pages/Dashboard/AddItem/AddItem";
 import AdminRoute from "./AdminRoute";
 import MyInventory from "../Pages/My Inventory/MyInventory";
 import UpdateProducts from "../Pages/My Inventory/UpdateProducts";
+import MangeOrder from "../Pages/MangeOrder/MangeOrder";
 
 
 export const router = createBrowserRouter([
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
             {
                 path: '/update-products/:id',
                 element: <PrivateRoute><AdminRoute><UpdateProducts></UpdateProducts></AdminRoute></PrivateRoute>
+            },
+            {
+                path:'/manage-orders',
+                element:<PrivateRoute><AdminRoute><MangeOrder></MangeOrder></AdminRoute></PrivateRoute>
             }
 
 

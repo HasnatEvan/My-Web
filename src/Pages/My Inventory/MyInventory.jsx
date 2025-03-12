@@ -43,7 +43,7 @@ const MyInventory = () => {
       <h1 className="text-2xl font-semibold mb-6 text-center">𝑴𝒚 𝑰𝒏𝒗𝒆𝒏𝒕𝒐𝒓𝒚</h1>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto mb-8">
         <table className="table-auto w-full text-left border-collapse">
           <thead className="bg-[#2DAA9E] text-white">
             <tr>
@@ -64,7 +64,7 @@ const MyInventory = () => {
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-4 mb-5">
         {products.map((product) => (
           <div key={product._id} className="bg-white shadow-lg rounded-lg p-4 border border-gray-200">
             <div className="flex items-center space-x-4">
